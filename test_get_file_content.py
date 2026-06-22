@@ -4,7 +4,6 @@ from config import MAX_CHARS
 from functions.get_file_content import get_file_content
 
 if __name__ == "__main__":
-    # files = [(f"'{x}'", x) if x != "." else ("current", x) for x in [".", "pkg", "/bin", "../"]]
     files = [
         "lorem.txt",
         "main.py",
