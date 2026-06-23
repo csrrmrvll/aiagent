@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from prompts import system_prompt
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 def main():
@@ -27,14 +27,22 @@ def main():
     if response.function_calls is None or len(response.function_calls) == 0:
         print(f"Response: {response.text}")
         return
+    function_results = []
     for function_call in response.function_calls:
-        print(f"Calling function: {function_call.name}({function_call.args})")
-        # if function_call.name == "get_files_info":
-        #     directory = function_call.arguments.get("directory", ".")
-        #     result = available_functions.function_declarations[0].execute(
-        #         directory=directory
-        #     )
-        #     print(f"Function result:\n{result}")
+        function_call_result = call_function(function_call, verbose=verbose)
+        parts = function_call_result.parts
+        if not parts:
+            raise RuntimeError("function call result has no parts")
+        first_part = parts[0]
+        function_response = first_part.function_response
+        if function_response is None:
+            raise RuntimeError("function call result has no function response")
+        response = function_response.response
+        if response is None:
+            raise RuntimeError("function call result has no response")
+        function_results.append(first_part)
+        if verbose:
+            print(f"-> {first_part.function_response.response}")
 
 
 def generate_content(
