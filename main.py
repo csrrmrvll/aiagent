@@ -37,7 +37,8 @@ def generate_content(
         model="gemini-2.5-flash",
         contents=messages,
         config=types.GenerateContentConfig(
-            tools=[available_functions], system_instruction=system_prompt, temperature=0
+            tools=[available_functions],
+            system_instruction=system_prompt,
         ),
     )
     candidates = response.candidates
@@ -79,6 +80,7 @@ def generate_content(
         )
     )
     return True
+
 
 if __name__ == "__main__":
     main()
