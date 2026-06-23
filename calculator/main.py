@@ -1,12 +1,24 @@
+"""
+main.py
+
+This script implements a command-line calculator application. It parses mathematical
+expressions from command-line arguments, evaluates them using a Calculator class,
+and displays the result or appropriate error messages.
+
+The application expects a single argument: the mathematical expression to be evaluated.
+Example usage:
+    python main.py "3 + 5 * 2"
+"""
 
 import sys
 from pkg.calculator import Calculator
 from pkg.render import format_json_output
 
+
 def display_usage() -> None:
     """
     Displays the application's usage instructions to the console.
-    This function is called when no expression or an invalid expression
+    This function is called when no expression or an valid expression
     is provided via command-line arguments.
     """
     print("Calculator App")
@@ -24,15 +36,17 @@ def parse_expression_from_arguments() -> str | None:
         A string containing the mathematical expression if found,
         otherwise None, indicating that no expression was provided.
     """
-    # sys.argv[0] is the script name, so we look for arguments starting from index 1.
+    # sys.argv[0] is the script name; arguments start from index 1.
     if len(sys.argv) < 2:
         return None
     # Joins all command-line arguments after the script name into a single string.
-    # This allows expressions with spaces (e.g., "1 + 2") to be passed correctly.
+    # This supports expressions with spaces (e.g., "1 + 2") passed as one argument.
     return " ".join(sys.argv[1:])
 
 
-def execute_calculation_and_display_result(calculator: Calculator, expression: str) -> None:
+def execute_calculation_and_display_result(
+    calculator: Calculator, expression: str
+) -> None:
     """
     Executes the given mathematical expression using the provided calculator instance.
     It handles potential errors during the evaluation process and prints the result
@@ -44,20 +58,21 @@ def execute_calculation_and_display_result(calculator: Calculator, expression: s
     """
     try:
         result = calculator.evaluate(expression)
-        # If the calculator returns a result (even 0 is a valid result),
-        # format and print it as JSON.
+        # If a valid numerical result is obtained, format and print it as JSON.
         if result is not None:
             output = format_json_output(expression, result)
             print(output)
         else:
-            # This case should ideally not be reached if the calculator handles
-            # all valid expressions by returning a number, but it's a safeguard.
+            # This case should ideally not be reached if the calculator always
+            # returns a number for valid expressions, but it acts as a safeguard.
             print(f"Error: No result obtained for expression '{expression}'.")
     except ValueError as e:
-        # Catches errors specific to invalid mathematical expressions (e.g., syntax errors).
+        # Catches errors specific to invalid mathematical expressions (e.g., syntax errors,
+        # division by zero, invalid tokens).
         print(f"Error: Invalid expression '{expression}': {e}")
     except Exception as e:
-        # Catches any other unexpected errors during the calculation process.
+        # Catches any other unexpected errors during the calculation process,
+        # ensuring robustness.
         print(f"Error: An unexpected error occurred during calculation: {e}")
 
 
@@ -71,7 +86,8 @@ def run_calculator_app() -> None:
 
     if expression is None:
         display_usage()
-        sys.exit(1)  # Exit with a non-zero status code to indicate an error (e.g., incorrect usage).
+        # Exit with a non-zero status code to indicate an error (e.g., incorrect usage).
+        sys.exit(1)
 
     execute_calculation_and_display_result(calculator, expression)
 
