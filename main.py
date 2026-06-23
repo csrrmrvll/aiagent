@@ -23,26 +23,7 @@ def main():
     if api_key is None:
         raise RuntimeError("api key not found")
     client = genai.Client(api_key=api_key)
-    response = generate_content(client=client, messages=messages, verbose=verbose)
-    if response.function_calls is None or len(response.function_calls) == 0:
-        print(f"Response: {response.text}")
-        return
-    function_results = []
-    for function_call in response.function_calls:
-        function_call_result = call_function(function_call, verbose=verbose)
-        parts = function_call_result.parts
-        if not parts:
-            raise RuntimeError("function call result has no parts")
-        first_part = parts[0]
-        function_response = first_part.function_response
-        if function_response is None:
-            raise RuntimeError("function call result has no function response")
-        response = function_response.response
-        if response is None:
-            raise RuntimeError("function call result has no response")
-        function_results.append(first_part)
-        if verbose:
-            print(f"-> {first_part.function_response.response}")
+    generate_content(client=client, messages=messages, verbose=verbose)
 
 
 def generate_content(
@@ -64,7 +45,25 @@ def generate_content(
         if verbose
         else None
     )
-    return response
+    if response.function_calls is None or len(response.function_calls) == 0:
+        print(f"Response: {response.text}")
+        return
+    function_results = []
+    for function_call in response.function_calls:
+        function_call_result = call_function(function_call, verbose=verbose)
+        parts = function_call_result.parts
+        if not parts:
+            raise RuntimeError("function call result has no parts")
+        first_part = parts[0]
+        function_response = first_part.function_response
+        if function_response is None:
+            raise RuntimeError("function call result has no function response")
+        response = function_response.response
+        if response is None:
+            raise RuntimeError("function call result has no response")
+        function_results.append(first_part)
+        if verbose:
+            print(f"-> {first_part.function_response.response}")
 
 
 if __name__ == "__main__":
