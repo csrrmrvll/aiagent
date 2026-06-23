@@ -18,7 +18,7 @@ from pkg.render import format_json_output
 def display_usage() -> None:
     """
     Displays the application's usage instructions to the console.
-    This function is called when no expression or an valid expression
+    This function is called when no expression or an invalid expression
     is provided via command-line arguments.
     """
     print("Calculator App")
@@ -50,7 +50,8 @@ def execute_calculation_and_display_result(
     """
     Executes the given mathematical expression using the provided calculator instance.
     It handles potential errors during the evaluation process and prints the result
-    or an appropriate error message to the console.
+    or an appropriate error message to the console, ensuring all error messages
+    start with 'Error: '.
 
     Args:
         calculator: An instance of the Calculator class responsible for evaluating expressions.
@@ -58,14 +59,9 @@ def execute_calculation_and_display_result(
     """
     try:
         result = calculator.evaluate(expression)
-        # If a valid numerical result is obtained, format and print it as JSON.
-        if result is not None:
-            output = format_json_output(expression, result)
-            print(output)
-        else:
-            # This case should ideally not be reached if the calculator always
-            # returns a number for valid expressions, but it acts as a safeguard.
-            print(f"Error: No result obtained for expression '{expression}'.")
+        # Assuming calculator.evaluate always returns a numeric result for valid expressions.
+        output = format_json_output(expression, result)
+        print(output)
     except ValueError as e:
         # Catches errors specific to invalid mathematical expressions (e.g., syntax errors,
         # division by zero, invalid tokens).
