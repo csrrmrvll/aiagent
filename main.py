@@ -23,12 +23,16 @@ def main():
     if api_key is None:
         raise RuntimeError("api key not found")
     client = genai.Client(api_key=api_key)
-    generate_content(client=client, messages=messages, verbose=verbose)
+    for _ in range(20):
+        if not generate_content(client=client, messages=messages, verbose=verbose):
+            return
+    print("Error: max iterations reached with no final response, stopping.")
+    exit(1)
 
 
 def generate_content(
     client: genai.Client, messages: list[types.Content], verbose: bool = False
-) -> None:
+) -> bool:
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=messages,
@@ -36,6 +40,10 @@ def generate_content(
             tools=[available_functions], system_instruction=system_prompt, temperature=0
         ),
     )
+    candidates = response.candidates
+    if candidates:
+        for candidate in candidates:
+            messages.append(candidate)
     usage_metadata = response.usage_metadata
     if usage_metadata is None:
         raise RuntimeError("usage metadata is missing, failed API request")
@@ -46,8 +54,8 @@ def generate_content(
         else None
     )
     if response.function_calls is None or len(response.function_calls) == 0:
-        print(f"Response: {response.text}")
-        return
+        print(f"Final response: {response.text}")
+        return False
     function_results = []
     for function_call in response.function_calls:
         function_call_result = call_function(function_call, verbose=verbose)
@@ -64,7 +72,13 @@ def generate_content(
         function_results.append(first_part)
         if verbose:
             print(f"-> {first_part.function_response.response}")
-
+    messages.append(
+        types.Content(
+            role="user",
+            parts=function_results,
+        )
+    )
+    return True
 
 if __name__ == "__main__":
     main()
